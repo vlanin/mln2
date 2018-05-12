@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 public class MainWindow extends javax.swing.JFrame {
     
     ArrayList<Question> questions = new ArrayList<Question>();
+    private Random  rnd = new Random();
+    int Level =0;
+    Question currentQuestion;
     
     private class Question
     {
@@ -42,6 +46,7 @@ public class MainWindow extends javax.swing.JFrame {
     public MainWindow() {
         initComponents();
         ReadFile();
+        startGame();
     }
 
     /**
@@ -54,13 +59,13 @@ public class MainWindow extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        btnAnswer1 = new javax.swing.JButton();
+        btnAnswer3 = new javax.swing.JButton();
+        btnAnswer2 = new javax.swing.JButton();
+        btnAnswer4 = new javax.swing.JButton();
         lblQuestionText = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        lstLevel = new javax.swing.JList<>();
         jLabel2 = new javax.swing.JLabel();
         btnAudienceHelp = new javax.swing.JButton();
         bntFiftyFifty = new javax.swing.JButton();
@@ -72,30 +77,54 @@ public class MainWindow extends javax.swing.JFrame {
 
         jPanel1.setLayout(new java.awt.GridLayout(2, 2));
 
-        jButton1.setText("jButton1");
-        jPanel1.add(jButton1);
+        btnAnswer1.setText("jButton1");
+        btnAnswer1.setActionCommand("1");
+        btnAnswer1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bntAnswerPerformed(evt);
+            }
+        });
+        jPanel1.add(btnAnswer1);
 
-        jButton3.setText("jButton3");
-        jPanel1.add(jButton3);
+        btnAnswer3.setText("jButton3");
+        btnAnswer3.setActionCommand("3");
+        btnAnswer3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bntAnswerPerformed(evt);
+            }
+        });
+        jPanel1.add(btnAnswer3);
 
-        jButton2.setText("jButton2");
-        jPanel1.add(jButton2);
+        btnAnswer2.setText("jButton2");
+        btnAnswer2.setActionCommand("2");
+        btnAnswer2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bntAnswerPerformed(evt);
+            }
+        });
+        jPanel1.add(btnAnswer2);
 
-        jButton4.setText("jButton4");
-        jPanel1.add(jButton4);
+        btnAnswer4.setText("jButton4");
+        btnAnswer4.setActionCommand("4");
+        btnAnswer4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                bntAnswerPerformed(evt);
+            }
+        });
+        jPanel1.add(btnAnswer4);
 
         lblQuestionText.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         lblQuestionText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lblQuestionText.setText("jLabel1");
 
-        jList1.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+        lstLevel.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        lstLevel.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "3 000 000", "1 500 000", "   800 000", "   400 000", "   200 000", "   100 000", "     50 000", "     25 000", "     15 000", "     10 000", "       5 000", "       3 000", "       2 000", "       1 000", "          500" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jList1.setEnabled(false);
-        jScrollPane1.setViewportView(jList1);
+        lstLevel.setEnabled(false);
+        jScrollPane1.setViewportView(lstLevel);
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/millionaire/maxresdefault.jpg"))); // NOI18N
 
@@ -165,10 +194,22 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bntFiftyFiftyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntFiftyFiftyActionPerformed
-        Question q = GetQuestion(1);
-        ShowQuestion(q);
+
     }//GEN-LAST:event_bntFiftyFiftyActionPerformed
 
+    private void bntAnswerPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntAnswerPerformed
+
+        if (currentQuestion.RightAnswer.equals(evt.getActionCommand()))
+            NextStep();            
+        else
+        {
+            JOptionPane.showMessageDialog(this, "Неверный ответ!");
+            startGame();
+        }
+        
+    }//GEN-LAST:event_bntAnswerPerformed
+
+   
     /**
      * @param args the command line arguments
      */
@@ -204,18 +245,33 @@ public class MainWindow extends javax.swing.JFrame {
         });
     }
     
-    private Random  rnd = new Random();
+    private void startGame()
+    {
+        Level = 0;
+        NextStep();
+    }
     
+    private void NextStep()
+    {
+        Level++;
+        currentQuestion = GetQuestion(Level);
+        ShowQuestion(currentQuestion);
+        lstLevel.setSelectedIndex(lstLevel.getModel().getSize()-Level);
+    }
+   
     private Question GetQuestion(int level)
     {
         List<Question> list = questions.stream().filter(q->q.Level==level).collect(Collectors.toList());
-        
         return list.get(rnd.nextInt(list.size()));
     }
     
     private void ShowQuestion(Question q)
     {
-            lblQuestionText.setText(q.Text);
+        lblQuestionText.setText(q.Text);
+        btnAnswer1.setText(q.Answers[0]);
+        btnAnswer2.setText(q.Answers[1]);
+        btnAnswer3.setText(q.Answers[2]);
+        btnAnswer4.setText(q.Answers[3]);
     }
     
     private void ReadFile()
@@ -237,17 +293,17 @@ public class MainWindow extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton bntFiftyFifty;
+    private javax.swing.JButton btnAnswer1;
+    private javax.swing.JButton btnAnswer2;
+    private javax.swing.JButton btnAnswer3;
+    private javax.swing.JButton btnAnswer4;
     private javax.swing.JButton btnAudienceHelp;
     private javax.swing.JButton btnCallFriend;
     private javax.swing.JButton btnTakeMoney;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblQuestionText;
+    private javax.swing.JList<String> lstLevel;
     // End of variables declaration//GEN-END:variables
 }
