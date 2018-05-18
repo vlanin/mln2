@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 /**
@@ -25,6 +26,7 @@ public class MainWindow extends javax.swing.JFrame {
     private Random  rnd = new Random();
     int Level =0;
     Question currentQuestion;
+    String money = "0";
     
     private class Question
     {
@@ -139,9 +141,19 @@ public class MainWindow extends javax.swing.JFrame {
         });
 
         btnCallFriend.setText("Звонок другу");
+        btnCallFriend.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCallFriendActionPerformed(evt);
+            }
+        });
 
         btnTakeMoney.setText("Забрать деньги");
         btnTakeMoney.setName("btnTakeMoney"); // NOI18N
+        btnTakeMoney.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTakeMoneyActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -194,13 +206,29 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bntFiftyFiftyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntFiftyFiftyActionPerformed
-
+        JButton[] btns = new JButton[]{btnAnswer1, 
+            btnAnswer2, btnAnswer3, btnAnswer4};
+        
+        int count = 0;
+        while (count<2) {
+            int n = rnd.nextInt(4);
+            String ac = btns[n].getActionCommand();
+            
+            if (!ac.equals(currentQuestion.RightAnswer)
+                    && btns[n].isEnabled()) {
+                btns[n].setEnabled(false);
+                count++;
+            }
+        }
     }//GEN-LAST:event_bntFiftyFiftyActionPerformed
 
     private void bntAnswerPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bntAnswerPerformed
 
-        if (currentQuestion.RightAnswer.equals(evt.getActionCommand()))
-            NextStep();            
+        if (currentQuestion.RightAnswer.equals(evt.getActionCommand())){
+            money = lstLevel.getModel().getElementAt(
+                        lstLevel.getSelectedIndex());
+            NextStep(); 
+        }
         else
         {
             JOptionPane.showMessageDialog(this, "Неверный ответ!");
@@ -208,6 +236,29 @@ public class MainWindow extends javax.swing.JFrame {
         }
         
     }//GEN-LAST:event_bntAnswerPerformed
+
+    private void btnTakeMoneyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTakeMoneyActionPerformed
+        int r = JOptionPane.showConfirmDialog( this,
+            "Забрать деньги?", "",
+                JOptionPane.YES_NO_OPTION);
+        
+        if (r == JOptionPane.YES_OPTION)
+        {
+            JOptionPane.showMessageDialog(this,
+                    "Вы выиграли " + money+" руб.!");
+            startGame();
+        }
+    }//GEN-LAST:event_btnTakeMoneyActionPerformed
+
+    private void btnCallFriendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCallFriendActionPerformed
+        int right = 
+            Integer.parseInt(currentQuestion.RightAnswer)-1;
+
+        int n = (right + (int)(0.2*Level)) % 4;
+        JOptionPane.showMessageDialog(this,
+            "Я думаю, верный ответ - " 
+                    + currentQuestion.Answers[n]+".");
+    }//GEN-LAST:event_btnCallFriendActionPerformed
 
    
     /**
@@ -253,6 +304,12 @@ public class MainWindow extends javax.swing.JFrame {
     
     private void NextStep()
     {
+        JButton[] btns = new JButton[]{btnAnswer1, 
+            btnAnswer2, btnAnswer3, btnAnswer4};
+        
+        for (JButton btn: btns)
+            btn.setEnabled(true);
+        
         Level++;
         currentQuestion = GetQuestion(Level);
         ShowQuestion(currentQuestion);
@@ -261,7 +318,8 @@ public class MainWindow extends javax.swing.JFrame {
    
     private Question GetQuestion(int level)
     {
-        List<Question> list = questions.stream().filter(q->q.Level==level).collect(Collectors.toList());
+        List<Question> list =
+                questions.stream().filter(q->q.Level==level).collect(Collectors.toList());
         return list.get(rnd.nextInt(list.size()));
     }
     
